@@ -7,12 +7,12 @@ import onlineCommons from '@jeecg/antd-online-mini'
 export function timeFix() {
   const time = new Date()
   const hour = time.getHours()
-  return hour < 9 ? '早上好' : (hour <= 11 ? '上午好' : (hour <= 13 ? '中午好' : (hour < 20 ? '下午好' : '晚上好')))
+  return hour < 9 ? '早上好' : hour <= 11 ? '上午好' : hour <= 13 ? '中午好' : hour < 20 ? '下午好' : '晚上好'
 }
 
 export function welcome() {
   const arr = ['休息一会儿吧', '准备吃什么呢?', '要不要打一把 DOTA', '我猜你可能累了']
-  let index = Math.floor((Math.random()*arr.length))
+  let index = Math.floor(Math.random() * arr.length)
   return arr[index]
 }
 
@@ -33,16 +33,15 @@ export function triggerWindowResizeEvent() {
  */
 export function filterObj(obj) {
   if (!(typeof obj == 'object')) {
-    return;
+    return
   }
 
-  for ( let key in obj) {
-    if (obj.hasOwnProperty(key)
-      && (obj[key] == null || obj[key] == undefined || obj[key] === '')) {
-      delete obj[key];
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key) && (obj[key] == null || obj[key] == undefined || obj[key] === '')) {
+      delete obj[key]
     }
   }
-  return obj;
+  return obj
 }
 
 /**
@@ -52,10 +51,10 @@ export function filterObj(obj) {
  * @returns {*}
  */
 export function formatDate(value, fmt) {
-  let regPos = /^\d+(\.\d+)?$/;
-  if(regPos.test(value)){
+  let regPos = /^\d+(\.\d+)?$/
+  if (regPos.test(value)) {
     //如果是数字
-    let getDate = new Date(value);
+    let getDate = new Date(value)
     let o = {
       'M+': getDate.getMonth() + 1,
       'd+': getDate.getDate(),
@@ -63,117 +62,116 @@ export function formatDate(value, fmt) {
       'm+': getDate.getMinutes(),
       's+': getDate.getSeconds(),
       'q+': Math.floor((getDate.getMonth() + 3) / 3),
-      'S': getDate.getMilliseconds()
-    };
+      S: getDate.getMilliseconds()
+    }
     if (/(y+)/.test(fmt)) {
       fmt = fmt.replace(RegExp.$1, (getDate.getFullYear() + '').substr(4 - RegExp.$1.length))
     }
     for (let k in o) {
       if (new RegExp('(' + k + ')').test(fmt)) {
-        fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : (('00' + o[k]).substr(('' + o[k]).length)))
+        fmt = fmt.replace(RegExp.$1, RegExp.$1.length === 1 ? o[k] : ('00' + o[k]).substr(('' + o[k]).length))
       }
     }
-    return fmt;
-  }else{
+    return fmt
+  } else {
     //TODO
-    value = value.trim();
-    return value.substr(0,fmt.length);
+    value = value.trim()
+    return value.substr(0, fmt.length)
   }
 }
 
 // 生成首页路由
 export function generateIndexRouter(data) {
-let indexRouter = [{
-          path: '/',
-          name: 'dashboard',
-          //component: () => import('@/components/layouts/BasicLayout'),
-          component: resolve => require(['@/components/layouts/TabLayout'], resolve),
-          meta: { title: '首页' },
-          redirect: '/dashboard/analysis',
-          children: [
-            ...generateChildRouters(data)
-          ]
-        },{
-          "path": "*", "redirect": "/404", "hidden": true
-        }]
-  return indexRouter;
+  let indexRouter = [
+    {
+      path: '/',
+      name: 'dashboard',
+      //component: () => import('@/components/layouts/BasicLayout'),
+      component: resolve => require(['@/components/layouts/TabLayout'], resolve),
+      meta: { title: '首页' },
+      redirect: '/dashboard/analysis',
+      children: [...generateChildRouters(data)]
+    },
+    {
+      path: '*',
+      redirect: '/404',
+      hidden: true
+    }
+  ]
+  return indexRouter
 }
 
 // 生成嵌套路由（子路由）
 
-function  generateChildRouters (data) {
-  const routers = [];
+function generateChildRouters(data) {
+  const routers = []
   for (let item of data) {
-    let component = "";
-    if(item.component.indexOf("layouts")>=0){
-       component = "components/"+item.component;
-    }else{
-       component = "views/"+item.component;
+    let component = ''
+    if (item.component.indexOf('layouts') >= 0) {
+      component = 'components/' + item.component
+    } else {
+      component = 'views/' + item.component
     }
 
     // eslint-disable-next-line
-    let URL = (item.meta.url|| '').replace(/{{([^}}]+)?}}/g, (s1, s2) => eval(s2)) // URL支持{{ window.xxx }}占位符变量
+    let URL = (item.meta.url || '').replace(/{{([^}}]+)?}}/g, (s1, s2) => eval(s2)) // URL支持{{ window.xxx }}占位符变量
     if (isURL(URL)) {
-      item.meta.url = URL;
+      item.meta.url = URL
     }
 
     let componentPath
-    if(item.component=="modules/online/cgform/OnlCgformHeadList"){
-      componentPath = onlineCommons.OnlCgformHeadList
-    }else if(item.component=="modules/online/cgform/OnlCgformCopyList"){
+    if (item.component == 'modules/online/cgform/OnlCgformCopyList') {
       componentPath = onlineCommons.OnlCgformCopyList
-    }else if(item.component=="modules/online/cgform/auto/OnlCgformAutoList"){
-      componentPath = onlineCommons.OnlCgformAutoList
-    }else if(item.component=="modules/online/cgform/auto/OnlCgformTreeList"){
+    } else if (item.component == 'modules/online/cgform/auto/OnlCgformTreeList') {
       componentPath = onlineCommons.OnlCgformTreeList
-    }else if(item.component=="modules/online/cgform/auto/erp/OnlCgformErpList"){
+    } else if (item.component == 'modules/online/cgform/auto/erp/OnlCgformErpList') {
       componentPath = onlineCommons.OnlCgformErpList
-    }else if(item.component=="modules/online/cgform/auto/tab/OnlCgformTabList"){
+    } else if (item.component == 'modules/online/cgform/auto/tab/OnlCgformTabList') {
       componentPath = onlineCommons.OnlCgformTabList
-    }else if(item.component=="modules/online/cgform/auto/innerTable/OnlCgformInnerTableList"){
+    } else if (item.component == 'modules/online/cgform/auto/innerTable/OnlCgformInnerTableList') {
       componentPath = onlineCommons.OnlCgformInnerTableList
-    }else if(item.component=="modules/online/cgreport/OnlCgreportHeadList"){
+    } else if (item.component == 'modules/online/cgreport/OnlCgreportHeadList') {
       componentPath = onlineCommons.OnlCgreportHeadList
-    }else if(item.component=="modules/online/cgreport/auto/OnlCgreportAutoList"){
+    } else if (item.component == 'modules/online/cgreport/auto/OnlCgreportAutoList') {
       componentPath = onlineCommons.OnlCgreportAutoList
-    }else{
-      componentPath = resolve => require(['@/' + component+'.vue'], resolve)
+    } else {
+      componentPath = resolve => require(['@/' + component + '.vue'], resolve)
     }
 
-    let menu =  {
+    let menu = {
       path: item.path,
       name: item.name,
-      redirect:item.redirect,
+      redirect: item.redirect,
       component: componentPath,
       //component: resolve => require(['@/' + component+'.vue'], resolve),
-      hidden:item.hidden,
+      hidden: item.hidden,
       //component:()=> import(`@/views/${item.component}.vue`),
       meta: {
-        title:item.meta.title ,
+        title: item.meta.title,
         icon: item.meta.icon,
-        url:item.meta.url ,
-        permissionList:item.meta.permissionList,
-        keepAlive:item.meta.keepAlive,
+        url: item.meta.url,
+        permissionList: item.meta.permissionList,
+        keepAlive: item.meta.keepAlive,
         /*update_begin author:wuxianquan date:20190908 for:赋值 */
-        internalOrExternal:item.meta.internalOrExternal,
+        internalOrExternal: item.meta.internalOrExternal,
         /*update_end author:wuxianquan date:20190908 for:赋值 */
-        componentName:item.meta.componentName
+        componentName: item.meta.componentName
       }
     }
-    if(item.alwaysShow){
-      menu.alwaysShow = true;
-      menu.redirect = menu.path;
+    if (item.alwaysShow) {
+      menu.alwaysShow = true
+      menu.redirect = menu.path
     }
     if (item.children && item.children.length > 0) {
-      menu.children = [...generateChildRouters( item.children)];
+      menu.children = [...generateChildRouters(item.children)]
     }
     //--update-begin----author:scott---date:20190320------for:根据后台菜单配置，判断是否路由菜单字段，动态选择是否生成路由（为了支持参数URL菜单）------
     //判断是否生成路由
-    if(item.route && item.route === '0'){
+    if (item.route && item.route === '0') {
       //console.log(' 不生成路由 item.route：  '+item.route);
       //console.log(' 不生成路由 item.path：  '+item.path);
-    }else{
-      routers.push(menu);
+    } else {
+      routers.push(menu)
     }
     //--update-end----author:scott---date:20190320------for:根据后台菜单配置，判断是否路由菜单字段，动态选择是否生成路由（为了支持参数URL菜单）------
   }
@@ -206,8 +204,8 @@ export function randomNumber() {
   }
   if (arguments.length === 1) {
     let [length] = arguments
-  // 生成指定长度的随机数字，首位一定不是 0
-    let nums = [...Array(length).keys()].map((i) => (i > 0 ? random(0, 9) : random(1, 9)))
+    // 生成指定长度的随机数字，首位一定不是 0
+    let nums = [...Array(length).keys()].map(i => (i > 0 ? random(0, 9) : random(1, 9)))
     return parseInt(nums.join(''))
   } else if (arguments.length >= 2) {
     let [min, max] = arguments
@@ -248,10 +246,10 @@ export function randomUUID() {
  * @param string
  * @returns {*}
  */
-export function underLine2CamelCase(string){
-  return string.replace( /_([a-z])/g, function( all, letter ) {
-    return letter.toUpperCase();
-  });
+export function underLine2CamelCase(string) {
+  return string.replace(/_([a-z])/g, function(all, letter) {
+    return letter.toUpperCase()
+  })
 }
 
 /**
@@ -259,11 +257,11 @@ export function underLine2CamelCase(string){
  * @param bpmStatus
  * @returns {*}
  */
-export function showDealBtn(bpmStatus){
-  if(bpmStatus!="1"&&bpmStatus!="3"&&bpmStatus!="4"){
-    return true;
+export function showDealBtn(bpmStatus) {
+  if (bpmStatus != '1' && bpmStatus != '3' && bpmStatus != '4') {
+    return true
   }
-  return false;
+  return false
 }
 
 /**
@@ -273,7 +271,7 @@ export function showDealBtn(bpmStatus){
  */
 export function cssExpand(css, id) {
   let style = document.createElement('style')
-  style.type = "text/css"
+  style.type = 'text/css'
   style.innerHTML = `@charset "UTF-8"; ${css}`
   // 清除旧样式
   if (id) {
@@ -285,7 +283,6 @@ export function cssExpand(css, id) {
   document.head.appendChild(style)
 }
 
-
 /** 用于js增强事件，运行JS代码，可以传参 */
 // options 所需参数：
 //    参数名         类型            说明
@@ -294,7 +291,6 @@ export function cssExpand(css, id) {
 //    jsCode         String          待执行的js代码
 //    errorMessage   String          执行出错后的提示（控制台）
 export function jsExpand(options = {}) {
-
   // 绑定到window上的keyName
   let windowKeyName = 'J_CLICK_EVENT_OPTIONS'
   if (typeof window[windowKeyName] != 'object') {
@@ -340,7 +336,6 @@ export function jsExpand(options = {}) {
   document.body.appendChild(script)
 }
 
-
 /**
  * 重复值验证工具方法
  *
@@ -356,11 +351,14 @@ export function jsExpand(options = {}) {
 export function validateDuplicateValue(tableName, fieldName, fieldVal, dataId, callback) {
   if (fieldVal) {
     let params = { tableName, fieldName, fieldVal, dataId }
-    api.duplicateCheck(params).then(res => {
-      res['success'] ? callback() : callback(res['message'])
-    }).catch(err => {
-      callback(err.message || err)
-    })
+    api
+      .duplicateCheck(params)
+      .then(res => {
+        res['success'] ? callback() : callback(res['message'])
+      })
+      .catch(err => {
+        callback(err.message || err)
+      })
   } else {
     callback()
   }
@@ -379,11 +377,14 @@ export function validateDuplicateValue(tableName, fieldName, fieldVal, dataId, c
 export function validateCheckRule(ruleCode, value, callback) {
   if (ruleCode && value) {
     value = encodeURIComponent(value)
-    api.checkRuleByCode({ ruleCode, value }).then(res => {
-      res['success'] ? callback() : callback(res['message'])
-    }).catch(err => {
-      callback(err.message || err)
-    })
+    api
+      .checkRuleByCode({ ruleCode, value })
+      .then(res => {
+        res['success'] ? callback() : callback(res['message'])
+      })
+      .catch(err => {
+        callback(err.message || err)
+      })
   } else {
     callback()
   }
@@ -398,7 +399,7 @@ export function validateCheckRule(ruleCode, value, callback) {
  */
 export function pushIfNotExist(array, value, key) {
   for (let item of array) {
-    if (key && (item[key] === value[key])) {
+    if (key && item[key] === value[key]) {
       return false
     } else if (item === value) {
       return false
@@ -457,7 +458,7 @@ export function alwaysResolve(promise) {
  */
 export function simpleDebounce(fn, delay = 100) {
   let timer = null
-  return function () {
+  return function() {
     let args = arguments
     if (timer) {
       clearTimeout(timer)
@@ -493,7 +494,7 @@ export function getEventPath(event) {
   let path = (event.composedPath && event.composedPath()) || event.path
 
   if (path != null) {
-    return (path.indexOf(window) < 0) ? path.concat(window) : path
+    return path.indexOf(window) < 0 ? path.concat(window) : path
   }
 
   if (target === window) {
@@ -541,7 +542,7 @@ export function getVmParentByName(vm, name) {
  * @param def 默认值，如果value为（null | undefined）则返回的默认值，可不传，默认为''
  */
 export function neverNull(value, def) {
-  return value == null ? (neverNull(def, '')) : value
+  return value == null ? neverNull(def, '') : value
 }
 
 /**
@@ -553,14 +554,14 @@ export function neverNull(value, def) {
  */
 export function removeArrayElement(array, prod, value) {
   let index = -1
-  for(let i = 0;i<array.length;i++){
-    if(array[i][prod] == value){
-      index = i;
-      break;
+  for (let i = 0; i < array.length; i++) {
+    if (array[i][prod] == value) {
+      index = i
+      break
     }
   }
-  if(index>=0){
-    array.splice(index, 1);
+  if (index >= 0) {
+    array.splice(index, 1)
   }
 }
 
@@ -613,7 +614,7 @@ export function aspectAroundFunction(obj, funcName, callback) {
   // 赋值新方法
   // 实现当外部调用 funcName 时，首先调用我定义的新方法
   // 然后调用传入的callback方法，以决定是否执行 funcName，以及更改参数、返回值
-  obj[funcName] = function (...args) {
+  obj[funcName] = function(...args) {
     return callback({
       args,
       // 只有执行 proceed 才会真正执行给定的 funcName 方法
@@ -623,7 +624,7 @@ export function aspectAroundFunction(obj, funcName, callback) {
         } catch (e) {
           console.error(e)
         }
-      },
+      }
     })
   }
 }

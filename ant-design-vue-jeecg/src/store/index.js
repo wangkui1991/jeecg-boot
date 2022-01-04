@@ -7,6 +7,7 @@ import enhance from './modules/enhance'
 import online from './modules/online'
 import permission from './modules/permission'
 import getters from './getters'
+import createLogger from 'vuex/dist/logger'
 
 Vue.use(Vuex)
 
@@ -16,16 +17,11 @@ export default new Vuex.Store({
     user,
     permission,
     enhance,
-    online,
+    online
   },
-  state: {
-
-  },
-  mutations: {
-
-  },
-  actions: {
-
-  },
-  getters
+  state: {},
+  mutations: {},
+  actions: {},
+  getters,
+  plugins: [createLogger()]
 })
