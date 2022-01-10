@@ -213,9 +213,9 @@ jeecg :
   file-view-domain: 127.0.0.1:8012
   # minio文件上传
   minio:
-    minio_url: http://minio.jeecg.com
-    minio_name: ??
-    minio_pass: ??
+    minio_url: http://127.0.0.1:9000
+    minio_name: minioadmin
+    minio_pass: minioadmin
     bucketName: otatest
   #大屏报表参数设置
   jmreport:

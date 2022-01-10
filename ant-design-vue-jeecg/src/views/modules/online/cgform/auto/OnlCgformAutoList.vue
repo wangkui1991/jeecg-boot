@@ -72,30 +72,28 @@
         style="margin-left:8px"
         >导出</a-button
       >
-      <div v-if="cgButtonList && cgButtonList.length > 0">
-        <template v-for="(item, index) in cgButtonList">
-          <a-button
-            v-if="item.optType == 'js'"
-            :key="'cgbtn' + index"
-            @click="cgButtonJsHandler(item.buttonCode)"
-            type="primary"
-            :icon="item.buttonIcon"
-            style="margin-left:8px"
-          >
-            {{ item.buttonName }}
-          </a-button>
-          <a-button
-            v-else-if="item.optType == 'action'"
-            :key="'cgbtn' + index"
-            @click="cgButtonActionHandler(item.buttonCode)"
-            type="primary"
-            :icon="item.buttonIcon"
-            style="margin-left:8px"
-          >
-            {{ item.buttonName }}
-          </a-button>
-        </template>
-      </div>
+      <template v-if="cgButtonList && cgButtonList.length > 0" v-for="(item, index) in cgButtonList">
+        <a-button
+          v-if="item.optType == 'js'"
+          :key="'cgbtn' + index"
+          @click="cgButtonJsHandler(item.buttonCode)"
+          type="primary"
+          :icon="item.buttonIcon"
+          style="margin-left:8px"
+        >
+          {{ item.buttonName }}
+        </a-button>
+        <a-button
+          v-else-if="item.optType == 'action'"
+          :key="'cgbtn' + index"
+          @click="cgButtonActionHandler(item.buttonCode)"
+          type="primary"
+          :icon="item.buttonIcon"
+          style="margin-left:8px"
+        >
+          {{ item.buttonName }}
+        </a-button>
+      </template>
 
       <a-button
         v-if="buttonSwitch.batch_delete"
@@ -123,7 +121,7 @@
         size="middle"
         rowKey="id"
         :columns="table.columns"
-        :data-source="table.dataSource"
+        :dataSource="table.dataSource"
         :pagination="table.pagination"
         :loading="table.loading"
         :rowSelection="{ selectedRowKeys: table.selectedRowKeys, onChange: handleChangeInTableSelect }"
@@ -185,19 +183,20 @@
                   </a-popconfirm>
                 </a-menu-item>
               </template>
-              <div v-if="cgButtonLinkList && cgButtonLinkList.length > 0">
-                <template v-for="(btnItem, btnIndex) in cgButtonLinkList">
-                  <a-menu-item :key="'cgbtnLink' + btnIndex">
-                    <a
-                      href="javascript:void(0);"
-                      @click="cgButtonLinkHandler(record, btnItem.buttonCode, btnItem.optType)"
-                    >
-                      <a-icon v-if="btnItem.buttonIcon" :type="btnItem.buttonIcon" />
-                      {{ btnItem.buttonName }}
-                    </a>
-                  </a-menu-item>
-                </template>
-              </div>
+              <template
+                v-if="cgButtonLinkList && cgButtonLinkList.length > 0"
+                v-for="(btnItem, btnIndex) in cgButtonLinkList"
+              >
+                <a-menu-item :key="'cgbtnLink' + btnIndex">
+                  <a
+                    href="javascript:void(0);"
+                    @click="cgButtonLinkHandler(record, btnItem.buttonCode, btnItem.optType)"
+                  >
+                    <a-icon v-if="btnItem.buttonIcon" :type="btnItem.buttonIcon" />
+                    {{ btnItem.buttonName }}
+                  </a>
+                </a-menu-item>
+              </template>
             </a-menu>
           </a-dropdown>
         </span>
@@ -239,7 +238,7 @@ export default {
         column: 'createTime',
         order: 'desc'
       },
-      // dictOptions:{fieldName:[]}
+      //dictOptions:{fieldName:[]}
       dictOptions: {},
       cgButtonLinkList: [],
       cgButtonList: [],
@@ -250,7 +249,7 @@ export default {
         loading: true,
         // 表头
         columns: [],
-        // 数据集
+        //数据集
         dataSource: [],
         // 选择器
         selectedRowKeys: [],
@@ -291,7 +290,6 @@ export default {
     }
   },
   created() {
-    console.log('wode')
     this.initAutoList()
   },
   mounted() {
@@ -329,7 +327,6 @@ export default {
     initAutoList() {
       let queryArr = this.$route.path.split('/')
       let code = queryArr.pop()
-      console.log(code, 'code')
       if (!code) {
         return false
       }
@@ -347,22 +344,27 @@ export default {
           this.initButtonSwitch(res.result.hideColumns)
           let currColumns = res.result.columns
           for (let a = 0; a < currColumns.length; a++) {
-            if (currColumns[a].scopedSlots) {
-              let dictCode = currColumns[a].scopedSlots.customRender
-              delete currColumns[a].customRender
-              // currColumns[a].customRender = text => {
-              //   return filterMultiDictText(this.dictOptions[dictCode], text)
-              // }
+            if (currColumns[a].customRender) {
+              let dictCode = currColumns[a].customRender
+              console.log(currColumns[a].scopedSlots, a, 'teset')
+
+              currColumns[a].customRender = text => {
+                return filterMultiDictText(this.dictOptions[dictCode], text)
+              }
             } else {
+              delete currColumns[a].customRender
+            }
+            if (!currColumns[a].scopedSlots) {
               delete currColumns[a].scopedSlots
             }
           }
+
           currColumns.push(this.actionColumn)
           this.table.columns = [...currColumns]
-          console.log(currColumns)
+          console.log(currColumns, 'currColumns')
           this.hasBpmStatusFilter()
           this.loadData()
-          // this.initQueryInfo()
+          this.initQueryInfo()
         } else {
           this.$message.warning(res.message)
         }
@@ -372,25 +374,20 @@ export default {
       if (arg == 1) {
         this.table.pagination.current = 1
       }
-      let params = this.getQueryParams() // 查询条件
+      let params = this.getQueryParams() //查询条件
       console.log('--onlineList-查询条件-->', params)
       getAction(`${this.url.getData}${this.code}`, params).then(res => {
         console.log('--onlineList-列表数据', res)
         if (res.success) {
           let result = res.result
-
           if (Number(result.total) > 0) {
             this.table.pagination.total = Number(result.total)
-            console.log(1)
             this.table.dataSource = result.records
-            console.log(2)
-            this.$nextTick(() => {
-              console.log(3, this.table)
-            })
+            console.log(3, this.table)
           } else {
             this.table.pagination.total = 0
             this.table.dataSource = []
-            // this.$message.warning("查无数据")
+            //this.$message.warning("查无数据")
           }
         } else {
           this.$message.warning(res.message)
@@ -409,10 +406,10 @@ export default {
       this.table.selectionRows = selectionRows
     },
     handleTableChange(pagination, filters, sorter) {
-      // TODO 筛选
+      //TODO 筛选
       if (Object.keys(sorter).length > 0) {
         this.isorter.column = sorter.field
-        this.isorter.order = sorter.order == 'ascend' ? 'asc' : 'desc'
+        this.isorter.order = 'ascend' == sorter.order ? 'asc' : 'desc'
       }
       this.table.pagination = pagination
       this.loadData()
@@ -459,8 +456,8 @@ export default {
           link.setAttribute('download', this.description + '.xls')
           document.body.appendChild(link)
           link.click()
-          document.body.removeChild(link) // 下载完成移除元素
-          window.URL.revokeObjectURL(url) // 释放掉blob对象
+          document.body.removeChild(link) //下载完成移除元素
+          window.URL.revokeObjectURL(url) //释放掉blob对象
         }
       })
     },
@@ -497,7 +494,7 @@ export default {
       if (text && text.indexOf(',') > 0) {
         text = text.substring(0, text.indexOf(','))
       }
-      return window._CONFIG['staticDomainURL'] + '/' + text
+      return text
     },
     uploadFile(text) {
       if (!text) {
@@ -507,7 +504,7 @@ export default {
       if (text.indexOf(',') > 0) {
         text = text.substring(0, text.indexOf(','))
       }
-      window.open(window._CONFIG['imgDomainURL'] + '/' + text) // TODO 下载的方法
+      window.open(window._CONFIG['imgDomainURL'] + '/' + text) //TODO 下载的方法
     },
     handleDelBatch() {
       if (this.table.selectedRowKeys.length <= 0) {
@@ -554,7 +551,7 @@ export default {
       return '/online/cgform/api/importXls/' + this.code
     },
     initCgEnhanceJs(enhanceJs) {
-      // console.log("--onlineList-js增强",enhanceJs)
+      //console.log("--onlineList-js增强",enhanceJs)
       if (enhanceJs) {
         let Obj = eval('(' + enhanceJs + ')')
         this.EnhanceJS = new Obj(getAction, postAction, deleteAction)
@@ -585,7 +582,7 @@ export default {
       }
     },
     cgButtonActionHandler(buttonCode) {
-      // 处理自定义button的 需要配置该button自定义sql
+      //处理自定义button的 需要配置该button自定义sql
       if (!this.table.selectedRowKeys || this.table.selectedRowKeys.length == 0) {
         this.$message.warning('请先选中一条记录')
         return false
